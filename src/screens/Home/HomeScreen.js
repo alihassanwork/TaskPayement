@@ -1,16 +1,18 @@
-import {StyleSheet, LogBox, TouchableOpacity} from 'react-native';
-import React, {useEffect} from 'react';
+import {StyleSheet, LogBox, TouchableOpacity, Button} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import {Container, Text} from '../../components';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
-import {useNavigation} from '@react-navigation/native';
-import NotificationService from './NotificationService';
+import NetInfo from '@react-native-community/netinfo';
+import {NoInternet, Header} from '../../components';
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
 ]);
 const HomeScreen = () => {
-  const navigation = useNavigation();
+  const [network, setNetwork] = useState('');
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
+    unsubscribeNet();
     getFCMToken();
     requestPermission();
     const unsubscribe = messaging().onMessage(async remoteMessage => {
@@ -18,9 +20,25 @@ const HomeScreen = () => {
       DisplayNotification(remoteMessage);
       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
-    return unsubscribe;
+    const unsubscribeInternect = NetInfo.addEventListener(state => {
+      setNetwork(state);
+    });
+
+    return unsubscribe, unsubscribeInternect;
   }, []);
 
+  function unsubscribeNet() {
+    NetInfo.fetch().then(state => {
+      setTimeout(function () {
+        if (state.isConnected === true && state.isInternetReachable === true) {
+          // any thing you want to load before navigate to screen
+          setNetwork(state);
+        } else {
+          setLoading(false);
+        }
+      }, 1000);
+    });
+  }
   const getFCMToken = () => {
     messaging()
       .getToken()
@@ -82,51 +100,42 @@ const HomeScreen = () => {
     });
   }
 
-  const sendNotification = async () => {
-    let notificationData = {
-      title: 'First Notification',
-      body: 'Notification Body',
-      token:
-        'dF4y6UuESueMXtdUsopIKJ:APA91bGHyfMC0D089MHmTRe1KdwODtdBWwB497ZELv_aZU__4x8I4EOLc58KTPxTNvUvUfwkIzocp1FU7wm9cUEWD2Le3-Y1DQRmTTxy6CcArx0k8jO10jw6W5QcCdTK_0UvUBQPCYNv',
-    };
-    await NotificationService.sendSingleDeviceNotification(notificationData);
-  };
-
-  const sendMultiNotification = async () => {
-    let notificationData = {
-      title: 'First Multi Device Notification',
-      body: 'Notification Body',
-      token: [
-        'dF4y6UuESueMXtdUsopIKJ:APA91bGHyfMC0D089MHmTRe1KdwODtdBWwB497ZELv_aZU__4x8I4EOLc58KTPxTNvUvUfwkIzocp1FU7wm9cUEWD2Le3-Y1DQRmTTxy6CcArx0k8jO10jw6W5QcCdTK_0UvUBQPCYNv',
-      ],
-    };
-    await NotificationService.sendMultiDeviceNotification(notificationData);
-  };
-
   const subscribeToTopic = () => {
     messaging()
       .subscribeToTopic('weather2')
       .then(() => console.log('Subscribed to topic!'));
   };
 
-  const unsubscribeToTopic = () => {
-    messaging()
-      .unsubscribeFromTopic('weather2')
-      .then(() => console.log('Unsubscribed fom the topic!'));
-  };
-
   return (
-    <Container style={styles.container}>
-      <TouchableOpacity onPress={localDisplayNotification}>
-        <Text isCenter>Local Push Notifications</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={subscribeToTopic}>
-        <Text isCenter>Local Notification</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={unsubscribeToTopic}>
-        <Text isCenter>Unsubscribe to Topic</Text>
-      </TouchableOpacity>
-    </Container>
+    <>
+      <Header title="HomeScreen" notification={true} />
+      <Container style={styles.container}>
+        <TouchableOpacity onPress={localDisplayNotification}>
+          <Text isCenter>Local Push Notifications</Text>
+        </TouchableOpacity>
+        {!network?.isConnected || !network?.isInternetReachable ? (
+          <Container style={styles.netContainer}>
+            <NoInternet style={styles.internetStat} />
+            <Button
+              title="Try Again"
+              onPress={() => {
+                setLoading(true);
+                unsubscribeNet();
+              }}
+              loading={loading}
+            />
+          </Container>
+        ) : (
+          <>
+            <TouchableOpacity onPress={subscribeToTopic}>
+              <Text isCenter isHeadingTitle hasMargin>
+                UPLOAD FILES
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </Container>
+    </>
   );
 };
 
@@ -136,7 +145,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'space-around',
     alignContent: 'center',
+    justifyContent: 'center',
+  },
+  internetStat: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    marginBottom: 10,
+  },
+  netContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

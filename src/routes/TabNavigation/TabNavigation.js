@@ -28,7 +28,7 @@ const TabNavigation = () => {
                   <icons.Feather
                     name="home"
                     size={27}
-                    color={focused ? colors.primary : COLORS.white}
+                    color={focused ? colors.primary : colors.text}
                   />
 
                   <Text isCenter style={styles.textStyle}>
@@ -41,7 +41,7 @@ const TabNavigation = () => {
               return (
                 <>
                   <icons.MaterialIcons
-                    color={focused ? colors.primary : COLORS.white}
+                    color={focused ? colors.primary : colors.text}
                     size={27}
                     name="category"
                   />
@@ -56,7 +56,7 @@ const TabNavigation = () => {
                   <icons.MaterialCommunityIcons
                     name="cart-check"
                     size={27}
-                    color={focused ? colors.primary : COLORS.white}
+                    color={focused ? colors.primary : colors.text}
                   />
 
                   <Text isCenter style={styles.textStyle}>
@@ -70,7 +70,7 @@ const TabNavigation = () => {
                   <icons.Ionicons
                     name="person-sharp"
                     size={27}
-                    color={focused ? colors.primary : COLORS.white}
+                    color={focused ? colors.primary : colors.text}
                   />
 
                   <Text isCenter style={styles.textStyle}>

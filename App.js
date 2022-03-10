@@ -6,7 +6,7 @@ import {StripeProvider} from '@stripe/stripe-react-native';
 const App = () => {
   return (
     <StripeProvider publishableKey="pk_test_51KYA9VCNnCwJI35CAVqXgAekF34eaIbAVOlQWeNVgcEb6YVi0NQOdMgNEdakLfKVb1p4M5U8sVXNRt3tgKl7UCs400W9Ho7TFz">
-      <NavigationContainer theme={darkTheme}>
+      <NavigationContainer theme={lightTheme}>
         <DrawerNavigation />
       </NavigationContainer>
     </StripeProvider>

@@ -1,2 +1,3 @@
 import CategoriesScreen from './CategoriesScreen';
-export {CategoriesScreen};
+import UploadFilesScreen from './UploadFilesScreen';
+export {CategoriesScreen, UploadFilesScreen};
